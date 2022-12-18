@@ -45,9 +45,8 @@ class ConvProtein(nn.Module):
         self._steps = 0
 
     def forward(self, inputs):
-        # inputs is in shape [batch_size , 60 , 60 , 1]
-        # transpose : [batch , width , length , dim] --> [batch , dim , width , length]
-        out = self._embedding(inputs).transpose(3,1)
+        # inputs is in shape [batch_size,  60 , 60 ]
+        out = self._embedding(inputs).transpose(-1,1)
         for conv in self.conv_layers:
             out = conv(out)
         out = F.adaptive_max_pool2d(out,(1,1))
@@ -60,7 +59,6 @@ class ConvProtein(nn.Module):
 
         preds = self(x)
         loss = F.mse_loss(preds,y)
-
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
@@ -68,7 +66,10 @@ class ConvProtein(nn.Module):
         self._steps += 1
 
         if self._steps % 100 == 0:
-            print(f'{self._steps:6d}--{loss.to("cpu").numpy().item():.3f}')
+            print(f'{self._steps:6d}--{loss.to("cpu").data.numpy().item():.3f}')
+        
+        if self._steps % 1000 == 0:
+            self.save()
 
     def save(self,name = None):
         if name is None :

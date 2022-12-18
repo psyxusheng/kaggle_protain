@@ -61,7 +61,7 @@ class DataProcessor():
             token_ids = self.vocab(seq)
             X.append(trunc_or_extend(token_ids,max_len))
             Y.append(targ)
-        X = FloatTensor(X).reshape([batch_size,1,*shape])
+        X = LongTensor(X).reshape([batch_size,*shape])
         Y = FloatTensor(Y)
         return X,Y
 

@@ -12,7 +12,7 @@ class Vocab():
         if vocab_file is None:
             vocab_file = os.path.join(path,'vocab.dat')
         vocab_list = open(vocab_file,'r').read().split()
-        self.loa(vocab_list)
+        self.load(vocab_list)
 
 
     def load(self,vocab_list):

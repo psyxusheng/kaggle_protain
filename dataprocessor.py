@@ -20,7 +20,7 @@ def padding(sequences,padding_idx = 0 , max_len = None):
 
 class DataProcessor():
 
-    def __init__(self,vocab,sequences , targets ):
+    def __init__(self,vocab, sequences , targets ):
         
         self.vocab = vocab
         self.sequences , self.targets = sequences,targets 
@@ -34,7 +34,7 @@ class DataProcessor():
         for i in range(batch_size):
             index = random.randint(0,self.N-1)
             seq,targ = self.sequences[index] , self.targets[index]
-            X.append(self.convert(seq))
+            X.append(padding(seq,padding_idx=0,max_len=3600))
             Y.append(targ)
         X = pad_sequence(X,padding_value=0,batch_first=True,)
         Y = FloatTensor(Y)

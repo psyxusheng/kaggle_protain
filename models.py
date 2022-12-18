@@ -3,6 +3,8 @@ from torch import nn
 from torch.nn import functional as F
 
 
-class Model(nn.Module):
+class ConvProtein(nn.Module):
     def __init__(self , ) -> None:
-        super(Model ,self).__init__()
+        super(ConvProtein ,self).__init__()
+
+        self._table = 

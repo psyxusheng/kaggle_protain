@@ -55,7 +55,7 @@ class ConvProtein(nn.Module):
         out = out.squeeze(-1)
         return out 
     
-    def train(self,x,y):
+    def updates(self,x,y):
 
         preds = self(x)
         loss = F.mse_loss(preds,y)
@@ -70,6 +70,12 @@ class ConvProtein(nn.Module):
         
         if self._steps % 1000 == 0:
             self.save()
+
+    def predicts(self,batch):
+        with torch.no_grad():
+            out = self(batch)
+        out = out.to('cpu').numpy().tolist()
+        return out
 
     def save(self,name = None):
         if name is None :

@@ -22,8 +22,6 @@ class Vocab():
         self._word_to_id['[pad]'] = 0
         self._id_to_word[0] = '[pad]'
 
-
-    
     def convert(self,sequence):
         return [self._word_to_id.get(s,0) for s in sequence]
     

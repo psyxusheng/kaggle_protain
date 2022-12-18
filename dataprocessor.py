@@ -65,6 +65,18 @@ class DataProcessor():
         Y = FloatTensor(Y)
         return X,Y
 
+    def export(self,n_batchs = 10 , batch_size = 100,max_len=3600,shape = [60,60]):
+        cursor = 0
+        for i in range(n_batchs):
+            X,Y = [],[]
+            for j in range(batch_size):
+                seq,targ = self.sequences[cursor] , self.targets[cursor]
+                token_ids = self.vocab(seq)
+                X.append(trunc_or_extend(token_ids,max_len))
+                Y.append(targ)
+                cursor += 1
+            yield LongTensor(X).reshape([batch_size,*shape]) , Y
+
 if __name__ == '__main__':
     from vocab import Vocab 
     vocab = Vocab(['a','b','c'])

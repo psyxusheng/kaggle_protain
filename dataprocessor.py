@@ -25,9 +25,18 @@ def trunc_or_extend(seq,max_len):
     else:
         # copy and expand 
         return seq[:] + [0]*(max_len - N)
-            
 
-
+def export_sequences(sequences,vocab,batch_size=100,shape = [60,60]):
+    N = len(sequences)
+    cursor = 0
+    while cursor < N:
+        sub = sequences[cursor : cursor + batch_size]
+        cursor += batch_size
+        sub_token_ids = [vocab(seq) for seq in sub]
+        extended      = [trunc_or_extend(token_id,max_len = shape[0]*shape[1]) for token_id in sub_token_ids]   
+        n = len(sub)
+        yield LongTensor(extended).reshape([n,*shape])
+    
 class DataProcessor():
 
     def __init__(self,vocab, sequences , targets , targ_range = None):
@@ -39,7 +48,6 @@ class DataProcessor():
             targ_range = [min(targets),max(targets)]
         self.targ_range = targ_range
         self.min_v , self.max_v = targ_range
-
 
         self.targets = [self.downscale(v) for v in targets]
         self.N = len(sequences)

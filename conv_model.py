@@ -47,14 +47,18 @@ class ConvProtein(nn.Module):
         self.device = 'cuda' if use_cuda and torch.cuda.is_available()  else "cpu"
 
 
-    def forward(self, inputs):
+    def forward(self, inputs,training=True):
         # inputs is in shape [batch_size,  60 , 60 ]
         if self.device == 'cuda':
             inputs = inputs.to(self.device)
         out = self._embedding(inputs).transpose(-1,1)
+        if training:
+            out = F.dropout(out,training=training)
         for conv in self.conv_layers:
             out = conv(out)
         out = F.adaptive_max_pool2d(out,(1,1))
+        if training:
+            out = F.dropout(out,training=training)
         out = out.squeeze(-1).squeeze(-1)
         out = self._mlp(out)
         out = out.squeeze(-1)
@@ -62,7 +66,7 @@ class ConvProtein(nn.Module):
     
     def updates(self,x,y):
 
-        preds = self(x)
+        preds = self(x,training = True)
         if self.device =='cuda':
             y = y.to(self.device) 
 
@@ -81,7 +85,7 @@ class ConvProtein(nn.Module):
 
     def predicts(self,batch):
         with torch.no_grad():
-            out = self(batch)
+            out = self(batch,training = False)
         out = out.to('cpu').numpy().tolist()
         return out
 
@@ -95,7 +99,7 @@ class ConvProtein(nn.Module):
         print(f'saved parameters to {name}')
     
     def load(self,name):
-        self.load_state_dict(torch.load(os.path.join('./ckpt',name)))
+        self.load_state_dict(torch.load(os.path.join('./ckpt',name),map_location=torch.device(self.device)))
         print(f'loaded model from {name}')
 
 if __name__ == '__main__':

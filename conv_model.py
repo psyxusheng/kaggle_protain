@@ -6,7 +6,7 @@ import os
 
 class ConvProtein(nn.Module):
 
-    def __init__(self,embeddings, hidden_sizes = [32,64,128,256,512] , lr = 1e-3):
+    def __init__(self,embeddings, hidden_sizes = [32,64,128,256,512] , lr = 1e-3 , use_cuda = False):
         # say input shape of this protein is in shape [batch_size,100,100,1] 
         # last dim is the acid thing 
         # first embedding it
@@ -44,8 +44,13 @@ class ConvProtein(nn.Module):
 
         self._steps = 0
 
+        self.device = 'cuda' if use_cuda and torch.cuda.is_available()  else "cpu"
+
+
     def forward(self, inputs):
         # inputs is in shape [batch_size,  60 , 60 ]
+        if self.device == 'cuda':
+            inputs = inputs.to(self.device)
         out = self._embedding(inputs).transpose(-1,1)
         for conv in self.conv_layers:
             out = conv(out)
@@ -58,6 +63,9 @@ class ConvProtein(nn.Module):
     def updates(self,x,y):
 
         preds = self(x)
+        if self.device =='cuda':
+            y = y.to(self.device) 
+
         loss = F.mse_loss(preds,y)
         self.optimizer.zero_grad()
         loss.backward()
@@ -80,12 +88,17 @@ class ConvProtein(nn.Module):
     def save(self,name = None):
         if name is None :
             sizes = '_'.join(map(str,self.hidden))
-            name = f'ckpt.{self.n_vocab}-{self.emb_dim}-{sizes}.pkl'
+            name = f'ckpt.{self.n_vocab}-{self.emb_dim}-{sizes}-{self._steps}.pkl'
         if not os.path.exists('./ckpt'):
-            os.path.makedirs('./ckpt')
+            os.makedirs('./ckpt')
         torch.save(self.state_dict(),os.path.join('./ckpt',name))
         print(f'saved parameters to {name}')
     
     def load(self,name):
         self.load_state_dict(torch.load(os.path.join('./ckpt',name)))
         print(f'loaded model from {name}')
+
+if __name__ == '__main__':
+    a = '123.123123123123.456'
+    b = a.split('.')
+    print(b)
